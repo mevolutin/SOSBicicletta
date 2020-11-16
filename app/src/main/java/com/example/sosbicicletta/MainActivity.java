@@ -20,7 +20,7 @@ import com.google.android.material.tabs.TabLayout;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    //gfdgjlfdskglkfdjgsdfgfdsgsdfgdfgdsfgyi
+    //dio
     private static int SPALSH_TIME_OUT = 2000;
     private Toolbar toolbar,toolbartab;
 
