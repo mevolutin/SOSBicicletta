@@ -28,6 +28,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MappaFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
@@ -37,55 +38,14 @@ public class MappaFragment extends Fragment implements OnMapReadyCallback, Googl
     private static final int REQUEST_LOCATION = 1;
     //private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
 
-    private LocationCallback locationCallback = new LocationCallback() {
-        @Override
-        public void onLocationResult(LocationResult locationResult) {
-            super.onLocationResult(locationResult);
-
-
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("DriverAvailable");
-
-                GeoFire geoFire = new GeoFire(ref);
-
-
-                // Read from the database
-
-                geoFire.getLocation("p3xtfZFOQvVf2p2hac0gunGkx7O2", new com.firebase.geofire.LocationCallback() {
-                    @Override
-                    public void onLocationResult(String key, GeoLocation location) {
-                        if (location != null) {
-                            System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
-                            Log.d("PINO", "onLocationResult: "+location);
-
-                        } else {
-                            System.out.println(String.format("There is no location for key %s in GeoFire", key));
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        System.err.println("There was an error getting the GeoFire location: " + databaseError);
-                        Log.d("PINO", "onLocationResult: "+databaseError);
-
-
-                    }
-                });
-
-            }
-        };
-
-
-
-
-
-
     private boolean mPermissionDenied = false;
-
 
     private GoogleMap mGoogleMap;
     private MapView mMapView;
     private View mView;
     private Location mLastLocation;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
 
 
     @Override
@@ -132,32 +92,7 @@ public class MappaFragment extends Fragment implements OnMapReadyCallback, Googl
         mGoogleMap = googleMap; //definizioine mappa
         enableMyLocation(); //richiama il metodo mylocation
 
-
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("DriverAvailable");
-        GeoFire geoFire = new GeoFire(ref);
-        geoFire.getLocation("p3xtfZFOQvVf2p2hac0gunGkx7O2", new com.firebase.geofire.LocationCallback() {
-            @Override
-            public void onLocationResult(String key, GeoLocation location) {
-                if (location != null) {
-                    System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
-                    Log.d("PINO", "onLocationResult: "+location);
-
-                } else {
-                    System.out.println(String.format("There is no location for key %s in GeoFire", key));
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.err.println("There was an error getting the GeoFire location: " + databaseError);
-                Log.d("PINO", "onLocationResult: "+databaseError);
-
-
-            }
-        });
-
-
-        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL); //seleziona il tipo di mappa (ibrida, street, satellite)
+        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL); //seleziona il tipo di mappa (ibrida, street, satellite)
         mGoogleMap.setOnMyLocationButtonClickListener(this);
         mGoogleMap.setOnMyLocationClickListener(this);
 
@@ -170,6 +105,39 @@ public class MappaFragment extends Fragment implements OnMapReadyCallback, Googl
     }
 
     public void onLocationChanged(Location location) {
+        LocationCallback locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+
+
+
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("DriverAvailable");
+                GeoFire geoFire = new GeoFire(ref);
+                // Read from the database
+                geoFire.getLocation("p3xtfZFOQvVf2p2hac0gunGkx7O2", new com.firebase.geofire.LocationCallback() {
+                    @Override
+                    public void onLocationResult(String key, GeoLocation location) {
+                        if (location != null) {
+                            System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
+                            Log.d("PINO", "onLocationResult: "+location);
+
+                        } else {
+                            System.out.println(String.format("There is no location for key %s in GeoFire", key));
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        System.err.println("There was an error getting the GeoFire location: " + databaseError);
+                        Log.d("PINO", "onLocationResult: "+databaseError);
+
+
+                    }
+                });
+
+            }
+        };
     }
 
     private void enableMyLocation() {
