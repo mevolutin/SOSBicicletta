@@ -5,7 +5,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,27 +14,18 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 
-import com.firebase.geofire.GeoFire;
-import com.firebase.geofire.GeoLocation;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.android.gms.maps.SupportMapFragment;
 
 public class MappaFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback, LocationListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private static final int REQUEST_LOCATION = 1;
+    private static final int REQUEST_LOCATION_PERMISSION = 1;
     //private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
 
     private boolean mPermissionDenied = false;
@@ -43,8 +33,6 @@ public class MappaFragment extends Fragment implements OnMapReadyCallback, Googl
     private GoogleMap mGoogleMap;
     private MapView mMapView;
     private View mView;
-    private Location mLastLocation;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
 
@@ -65,142 +53,72 @@ public class MappaFragment extends Fragment implements OnMapReadyCallback, Googl
     }
 
 
-    private void getDriverLocation() {
-        DatabaseReference DLref = FirebaseDatabase.getInstance().getReference("DriverAvailable")
-                .child("p3xtfZFOQvVf2p2hac0gunGkx7O2").child("l");
-
-
-    }
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mMapView = (MapView) mView.findViewById(R.id.mapview);
-        if (mMapView != null) {
-            mMapView.onCreate(null);
-            mMapView.onResume();
-            mMapView.getMapAsync(this);
 
-        }
+        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.mapview);
+        mapFragment.getMapAsync(this);
+
 
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        MapsInitializer.initialize(requireContext()); //inzializza mappa
-
-        mGoogleMap = googleMap; //definizioine mappa
-        enableMyLocation(); //richiama il metodo mylocation
-
-        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL); //seleziona il tipo di mappa (ibrida, street, satellite)
-        mGoogleMap.setOnMyLocationButtonClickListener(this);
-        mGoogleMap.setOnMyLocationClickListener(this);
+        //MapsInitializer.initialize(requireContext()); //inzializza mappa
+        mGoogleMap = googleMap;
+        enableMyLocation();
 
 
-        //googleMap.addMarker(new MarkerOptions().position(user).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));;
 
-        //CameraPosition Liberty = CameraPosition.builder().target(user).zoom(16).bearing(0).tilt(45).build();
-        //googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(Liberty));
+
+
 
     }
 
     public void onLocationChanged(Location location) {
-        LocationCallback locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
 
 
 
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("DriverAvailable");
-                GeoFire geoFire = new GeoFire(ref);
-                // Read from the database
-                geoFire.getLocation("p3xtfZFOQvVf2p2hac0gunGkx7O2", new com.firebase.geofire.LocationCallback() {
-                    @Override
-                    public void onLocationResult(String key, GeoLocation location) {
-                        if (location != null) {
-                            System.out.println(String.format("The location for key %s is [%f,%f]", key, location.latitude, location.longitude));
-                            Log.d("PINO", "onLocationResult: "+location);
-
-                        } else {
-                            System.out.println(String.format("There is no location for key %s in GeoFire", key));
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        System.err.println("There was an error getting the GeoFire location: " + databaseError);
-                        Log.d("PINO", "onLocationResult: "+databaseError);
-
-
-                    }
-                });
-
-            }
-        };
     }
 
     private void enableMyLocation() {
-        if (ActivityCompat.checkSelfPermission(getContext(), //se già si ha il permesso
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(getContext(),
-                        android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(getActivity(),
-                    new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                            android.Manifest.permission.ACCESS_FINE_LOCATION,},
-                    REQUEST_LOCATION);
-        } else {
-            mGoogleMap.setMyLocationEnabled(true); //altrimenti richiedilo
-        }
-    }
-
-    private void requestPermissions(FragmentActivity activity, String[] strings, int requestLocation) {
-
-        if (ContextCompat.checkSelfPermission(getActivity(),
+        if (ContextCompat.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                    android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-
-            } else {
-
-
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                        1);
-            }
-
+                == PackageManager.PERMISSION_GRANTED) {
+            mGoogleMap.setMyLocationEnabled(true);
+        } else {
+            ActivityCompat.requestPermissions(getActivity(), new String[]
+                            {Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION_PERMISSION);
         }
-
-
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
-            return;
-        }
-
-        if (PermissionUtils.isPermissionGranted(permissions, grantResults,
-                Manifest.permission.ACCESS_FINE_LOCATION)) {
-            // Enable the my location layer if the permission has been granted.
-            enableMyLocation();
-        } else {
-            // Display the missing permission error dialog when the fragments resume.
-            mPermissionDenied = true;
+        switch (requestCode) {
+            case REQUEST_LOCATION_PERMISSION:
+                if (grantResults.length > 0
+                        && grantResults[0]
+                        == PackageManager.PERMISSION_GRANTED) {
+                    enableMyLocation();
+                    break;
+                }
         }
 
     }
+    
 
-    private void getLocation() {
-        DatabaseReference driverLocation = FirebaseDatabase.getInstance().getReference().child("DriverAvailable");
-        GeoFire geoFire = new GeoFire(driverLocation);
-        Log.d("DRIVER", "onCreate: " + geoFire);
-    }
+     private void getCurrentLocation(){
+
+
+
+
+
+
+     }
 
 
     @Override
