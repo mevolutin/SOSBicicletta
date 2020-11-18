@@ -90,7 +90,7 @@ public class MappaFragment extends Fragment implements OnMapReadyCallback, Googl
         } else {
             ActivityCompat.requestPermissions(getActivity(), new String[]
                             {Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_LOCATION_PERMISSION);//sfdhfghfgdhfdgghfdghgfghfdgh
+                    REQUEST_LOCATION_PERMISSION);//sesso
         }
     }
 
