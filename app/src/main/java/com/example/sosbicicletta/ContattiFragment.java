@@ -11,6 +11,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +25,11 @@ public class ContattiFragment extends Fragment {
 
     View v;
    private RecyclerView myrecyclerview;
+   private FirebaseDatabase db = FirebaseDatabase.getInstance();
+   private DatabaseReference root = db.getReference().child("DriverAvailable");
    private List<Contatti> lstContatti;
-    public ContattiFragment(){
+   private RecyclerViewAdapter adapter;
+   public ContattiFragment(){
 
     }
 
@@ -29,9 +38,10 @@ public class ContattiFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_contatti,container,false);
         myrecyclerview = (RecyclerView) v.findViewById(R.id.cont_recycler);
-        RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(getContext(),lstContatti);
+        //RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(getContext(),lstContatti);
         myrecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
-        myrecyclerview.setAdapter(recyclerViewAdapter);
+        adapter = new RecyclerViewAdapter(getContext(),lstContatti);
+        myrecyclerview.setAdapter(adapter);
 
         return v;
     }
@@ -41,20 +51,26 @@ public class ContattiFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         lstContatti = new ArrayList<>();
-        lstContatti.add(new Contatti("Driver 1","111111111",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 2","222222222",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 3","333333333",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 4","444444444",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 5","555555555",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 6","666666666",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 7","777777777",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 1","111111111",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 2","222222222",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 3","333333333",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 4","444444444",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 5","555555555",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 6","666666666",R.drawable.ic_launcher_background));
-        lstContatti.add(new Contatti("Driver 7","777777777",R.drawable.ic_launcher_background));
+        root.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot Snapshot) {
+                for (DataSnapshot dataSnapshot : Snapshot.getChildren()){
+                    Contatti model = dataSnapshot.getValue(Contatti.class);
+                    lstContatti.add(model);
+
+                }
+                adapter.notifyDataSetChanged();
+
+            }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
 
 
     }

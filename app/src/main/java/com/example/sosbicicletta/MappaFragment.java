@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,13 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import static android.content.ContentValues.TAG;
 
 public class MappaFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
@@ -33,13 +41,16 @@ public class MappaFragment extends Fragment implements OnMapReadyCallback, Googl
     private GoogleMap mGoogleMap;
     private MapView mMapView;
     private View mView;
-
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    String Nome;
+    String Telefono;
+    String UserId;
 
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        DataFirebase();
 
     }
 
@@ -47,7 +58,6 @@ public class MappaFragment extends Fragment implements OnMapReadyCallback, Googl
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_mappa, container, false);
-
 
         return mView;
     }
@@ -68,6 +78,7 @@ public class MappaFragment extends Fragment implements OnMapReadyCallback, Googl
         //MapsInitializer.initialize(requireContext()); //inzializza mappa
         mGoogleMap = googleMap;
         enableMyLocation();
+
 
 
 
@@ -109,16 +120,28 @@ public class MappaFragment extends Fragment implements OnMapReadyCallback, Googl
         }
 
     }
-    
-
-     private void getCurrentLocation(){
 
 
+    private  void DataFirebase(){
+        DocumentReference docRef = db.collection("users").document("p3xtfZFOQvVf2p2hac0gunGkx7O2");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Nome = String.valueOf(document.get("Nome"));
+                        Telefono = String.valueOf(document.get("Telefono"));
+                        Log.d("document", "DocumentSnapshot data: " + Telefono);
 
-
-
-
-     }
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });}
 
 
     @Override

@@ -80,6 +80,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
+
         holder.tv_nome.setText(mData.get(position).getNome());
         holder.tv_telefono.setText(mData.get(position).getTelefono());
         holder.img.setImageResource(mData.get(position).getFoto());
@@ -88,10 +89,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public int getItemCount() {
+
         return mData.size();
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{
+
         private LinearLayout item_cont;
         private TextView tv_nome;
         private TextView tv_telefono;
